@@ -1,0 +1,72 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:14-alpine
+    container_name: elephant_book_db
+    environment:
+      POSTGRES_DB: elephant_book
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: Meera@2005
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d elephant_book"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - elephant_book_network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: elephant_book_backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://admin:Meera%402005@db:5432/elephant_book
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: >
+      sh -c "
+        python init_db.py &&
+        uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+      "
+    networks:
+      - elephant_book_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:8000
+    container_name: elephant_book_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - elephant_book_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  elephant_book_network:
+    driver: bridge
