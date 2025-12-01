@@ -22,7 +22,7 @@ docker-compose up -d --build
 1. **PostgreSQL Database** (port 5432)
    - Database: `elephant_book`
    - User: `admin`
-   - Password: `Meera@2005`
+   - Password: `admin`
 
 2. **FastAPI Backend** (port 8000)
    - Auto-initializes database tables
