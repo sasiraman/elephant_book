@@ -29,7 +29,7 @@ The application uses PostgreSQL with the following connection settings:
 - Port: 5432
 - Database: elephant_book
 - User: admin
-- Password: Meera@2005
+- Password: @#######@***
 
 Make sure the database and tables are already created as specified in the requirements.
 
